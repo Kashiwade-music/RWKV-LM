@@ -1,0 +1,31 @@
+[project]
+name = "rwkv-lm"
+version = "0.1.0"
+description = "Add a short description here"
+authors = [
+    { name = "Kashiwade-music", email = "music5d7_9265@outlook.jp" }
+]
+dependencies = [
+    "torch==1.13.1",
+    "torchvision==0.14.1",
+    "torchaudio==0.13.1",
+    "pytorch-lightning==1.9.2",
+    "rich~=13.4.1",
+    "deepspeed~=0.9.3",
+    "transformers~=4.29.2",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "black~=23.3.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
