@@ -20,8 +20,8 @@ args = types.SimpleNamespace()
 # Step 1: set model & config (use v4 to run your trained-from-scratch models. v4 and v4neo are compatible)
 ########################################################################################################
 
-args.RUN_DEVICE = "cuda" # 'cuda' // 'cpu' (already fast)
-args.FLOAT_MODE = "fp16" # fp16 (good for GPU, does not work for CPU) // fp32 (good for CPU) // bf16 (less accurate, but works for CPU)
+args.RUN_DEVICE = "cpu" # 'cuda' // 'cpu' (already fast)
+args.FLOAT_MODE = "fp32" # fp16 (good for GPU, does not work for CPU) // fp32 (good for CPU) // bf16 (less accurate, but works for CPU)
 
 # if args.RUN_DEVICE == "cuda":
 #     os.environ["RWKV_RUN_BACKEND"] = 'nvfuser' # !!!BUGGY!!! wrong output
@@ -38,29 +38,40 @@ vocab_size = 50277
 # Download Pile models: https://huggingface.co/BlinkDL
 # or, set MODEL_NAME to your fine-tuned model
 
-# MODEL_NAME = "/fsx/BlinkDL/rwkv-release/RWKV-4-Pile-169M-20220807-8023"
+## 169M
+# MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-169M-20220807-8023"
 # n_layer = 12
 # n_embd = 768
 # ctx_len = 1024
 
-# MODEL_NAME = '/fsx/BlinkDL/rwkv-release/RWKV-4-Pile-430M-20220808-8066'
+## 430M
+# MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-430M-20220808-8066"
 # n_layer = 24
 # n_embd = 1024
 # ctx_len = 1024
 
-# MODEL_NAME = '/fsx/BlinkDL/HF-MODEL/rwkv-4-pile-1b5/RWKV-4-Pile-1B5-20220903-8040'
+## 1.5B
+# MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-1B5-20220929-ctx4096"
 # n_layer = 24
 # n_embd = 2048
 # ctx_len = 1024
 
-# MODEL_NAME = '/fsx/BlinkDL/HF-MODEL/rwkv-4-pile-3b/RWKV-4-Pile-3B-20221008-8023'
+# 3B
+# MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-3B-20221110-ctx4096"
 # n_layer = 32
 # n_embd = 2560
 # ctx_len = 1024
 
-MODEL_NAME = '/fsx/BlinkDL/HF-MODEL/rwkv-4-pile-7b/RWKV-4-Pile-7B-20221115-8047'
-n_layer = 32
-n_embd = 4096
+## 7B
+#MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-7B-20230406-ctx8192-test949"
+#n_layer = 32
+#n_embd = 4096
+#ctx_len = 1024
+
+## 14B
+MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-14B-20230313-ctx8192-test1050"
+n_layer = 40
+n_embd = 5120
 ctx_len = 1024
 
 args.MODEL_NAME = MODEL_NAME
@@ -81,10 +92,10 @@ os.environ["RWKV_RUN_DEVICE"] = args.RUN_DEVICE
 # context = 'A'
 # context = "\nIn the"
 # context = '\nSugar:'
-context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote, previously unexplored valley, in Tibet. Even more surprising to the researchers was the fact that the dragons spoke perfect Chinese."
+# context = '\nTokyo Institute of Technology and Tokyo Medical and Dental University, state-fun facilities that are aiming to merge in fiscal 2024, said Thursday that they have decided to name the new university “'
 
 # context = "\n深圳是" # test Chinese
-# context = "\n東京は" # test Japanese
+context = "\n2024年度の統合を目指す国立の東京工業大（東京）と東京医科歯科大（同）は、新大学の名称を「" # test Japanese
 
 # ###### A good prompt for Q&A ######
 # context = '''
