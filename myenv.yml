@@ -167,4 +167,3 @@ dependencies:
       - pydantic==1.10.11
       - pygments==2.15.1
       - rich==13.4.2
-prefix: /home/kashiwade/anaconda3/envs/RWKV-LM
