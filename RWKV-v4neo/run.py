@@ -25,7 +25,7 @@ args = types.SimpleNamespace()
 print(f"Running on {torch.cuda.get_device_name(0)}")
 print(f"os.environ['CUDA_VISIBLE_DEVICES']: {os.environ['CUDA_VISIBLE_DEVICES']}")
 args.RUN_DEVICE = "cuda"  # 'cuda' // 'cpu' (already fast)
-args.FLOAT_MODE = "int8"  # fp16 (good for GPU, does not work for CPU) // fp32 (good for CPU) // bf16 (less accurate, but works for CPU) // int8
+args.FLOAT_MODE = "bf16"  # fp16 (good for GPU, does not work for CPU) // fp32 (good for CPU) // bf16 (less accurate, but works for CPU) // int8
 
 # if args.RUN_DEVICE == "cuda":
 #     os.environ["RWKV_RUN_BACKEND"] = 'nvfuser' # !!!BUGGY!!! wrong output
@@ -45,10 +45,10 @@ vocab_size = 50277
 # or, set MODEL_NAME to your fine-tuned model
 
 ## 169M
-# MODEL_NAME = "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-169M-20220807-8023"
-# n_layer = 12
-# n_embd = 768
-# ctx_len = 1024
+MODEL_NAME = "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-169M-20220807-8023"
+n_layer = 12
+n_embd = 768
+ctx_len = 1024
 
 ## 430M
 # MODEL_NAME = "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-430M-20220808-8066"
@@ -81,10 +81,10 @@ vocab_size = 50277
 # ctx_len = 1024
 
 ## 14B
-MODEL_NAME = "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-14B-20230313-ctx8192-test1050"
-n_layer = 40
-n_embd = 5120
-ctx_len = 1024
+# MODEL_NAME = "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-14B-20230313-ctx8192-test1050"
+# n_layer = 40
+# n_embd = 5120
+# ctx_len = 1024
 
 args.MODEL_NAME = MODEL_NAME
 args.n_layer = n_layer
@@ -120,26 +120,26 @@ context = "\n2024年度の統合を目指す国立の東京工業大（東京）
 # '''
 
 # ###### A good prompt for chatbot ######
-# context = '''
+# context = """
 # The following is a conversation between a highly knowledgeable and intelligent AI assistant called Bot, and a human user called User. In the following interactions, User and Bot converse in natural language, and Bot always answer User's questions. Bot is very smart, polite and humorous. Bot knows a lot, and always tells the truth. The conversation begins.
-
+#
 # User: who is president of usa?
-
+#
 # Bot: It’s Joe Biden; he was sworn in earlier this year.
-
+#
 # User: french revolution what year
-
+#
 # Bot: It started in 1789, but it lasted 10 years until 1799.
-
+#
 # User: guess i marry who ?
-
+#
 # Bot: Only if you tell me more about yourself - what are your interests?
-
+#
 # User: wat is lhc
-
+#
 # Bot: It’s a large and very expensive piece of science equipment. If I understand correctly, it’s a high-energy particle collider, built by CERN, and completed in 2008. They used it to confirm the existence of the Higgs boson in 2012.
-
-# User:''' # type your question here
+#
+# User: """  # type your question here
 
 NUM_TRIALS = 1
 LENGTH_PER_TRIAL = 333
