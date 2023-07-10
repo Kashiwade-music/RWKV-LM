@@ -6,8 +6,11 @@ import numpy as np
 import math, os, sys, types, time, gc
 import torch
 from src.utils import TOKENIZER
+from rich import print
+
 try:
-    os.environ["CUDA_VISIBLE_DEVICES"] = sys.argv[1]
+    # os.environ["CUDA_VISIBLE_DEVICES"] = sys.argv[1]
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 except:
     pass
 torch.backends.cudnn.benchmark = True
@@ -19,13 +22,16 @@ args = types.SimpleNamespace()
 ########################################################################################################
 # Step 1: set model & config (use v4 to run your trained-from-scratch models. v4 and v4neo are compatible)
 ########################################################################################################
-
-args.RUN_DEVICE = "cuda" # 'cuda' // 'cpu' (already fast)
-args.FLOAT_MODE = "fp16" # fp16 (good for GPU, does not work for CPU) // fp32 (good for CPU) // bf16 (less accurate, but works for CPU)
+print(f"Running on {torch.cuda.get_device_name(0)}")
+print(f"os.environ['CUDA_VISIBLE_DEVICES']: {os.environ['CUDA_VISIBLE_DEVICES']}")
+args.RUN_DEVICE = "cuda"  # 'cuda' // 'cpu' (already fast)
+args.FLOAT_MODE = "int8"  # fp16 (good for GPU, does not work for CPU) // fp32 (good for CPU) // bf16 (less accurate, but works for CPU) // int8
 
 # if args.RUN_DEVICE == "cuda":
 #     os.environ["RWKV_RUN_BACKEND"] = 'nvfuser' # !!!BUGGY!!! wrong output
-os.environ["RWKV_JIT_ON"] = '1' # '1' or '0'. very useful for GPU/CPU fp32, but might be harmful for GPU fp16. please benchmark !!!
+os.environ[
+    "RWKV_JIT_ON"
+] = "1"  # '1' or '0'. very useful for GPU/CPU fp32, but might be harmful for GPU fp16. please benchmark !!!
 
 TOKEN_MODE = "pile"
 WORD_NAME = [
@@ -39,37 +45,43 @@ vocab_size = 50277
 # or, set MODEL_NAME to your fine-tuned model
 
 ## 169M
-# MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-169M-20220807-8023"
+# MODEL_NAME = "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-169M-20220807-8023"
 # n_layer = 12
 # n_embd = 768
 # ctx_len = 1024
 
 ## 430M
-# MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-430M-20220808-8066"
+# MODEL_NAME = "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-430M-20220808-8066"
 # n_layer = 24
 # n_embd = 1024
 # ctx_len = 1024
 
 ## 1.5B
-# MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-1B5-20220929-ctx4096"
+# MODEL_NAME = (
+#     "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-1B5-20220929-ctx4096"
+# )
 # n_layer = 24
 # n_embd = 2048
 # ctx_len = 1024
 
 # 3B
-# MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-3B-20221110-ctx4096"
+# MODEL_NAME = (
+#     "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-3B-20221110-ctx4096"
+# )
 # n_layer = 32
 # n_embd = 2560
 # ctx_len = 1024
 
 ## 7B
-#MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-7B-20230406-ctx8192-test949"
-#n_layer = 32
-#n_embd = 4096
-#ctx_len = 1024
+# MODEL_NAME = (
+#     "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-7B-20230406-ctx8192-test949"
+# )
+# n_layer = 32
+# n_embd = 4096
+# ctx_len = 1024
 
 ## 14B
-MODEL_NAME = "/home/kashiwade/Documents/PlainTextProject/backup-via-Git/RWKV-LM/pretrained_models/RWKV-4-Pile-14B-20230313-ctx8192-test1050"
+MODEL_NAME = "/home/rtakahashi/workspaces/RWKV-LM/pretrained_models/RWKV-4-Pile-14B-20230313-ctx8192-test1050"
 n_layer = 40
 n_embd = 5120
 ctx_len = 1024
@@ -95,7 +107,7 @@ os.environ["RWKV_RUN_DEVICE"] = args.RUN_DEVICE
 # context = '\nTokyo Institute of Technology and Tokyo Medical and Dental University, state-fun facilities that are aiming to merge in fiscal 2024, said Thursday that they have decided to name the new university “'
 
 # context = "\n深圳是" # test Chinese
-context = "\n2024年度の統合を目指す国立の東京工業大（東京）と東京医科歯科大（同）は、新大学の名称を「" # test Japanese
+context = "\n2024年度の統合を目指す国立の東京工業大（東京）と東京医科歯科大（同）は、新大学の名称を「"  # test Japanese
 
 # ###### A good prompt for Q&A ######
 # context = '''
@@ -129,7 +141,7 @@ context = "\n2024年度の統合を目指す国立の東京工業大（東京）
 
 # User:''' # type your question here
 
-NUM_TRIALS = 999
+NUM_TRIALS = 1
 LENGTH_PER_TRIAL = 333
 
 TEMPERATURE = 1.0
@@ -140,12 +152,12 @@ DEBUG_DEBUG = False  # True False --> show softmax output
 
 ########################################################################################################
 
-print(f'\nUsing {args.RUN_DEVICE.upper()}. Loading {MODEL_NAME}...')
+print(f"\nUsing {args.RUN_DEVICE.upper()}. Loading {MODEL_NAME}...")
 from src.model_run import RWKV_RNN
 
 model = RWKV_RNN(args)
 
-print(f'\nOptimizing speed...')
+print(f"\nOptimizing speed...")
 out, _ = model.forward([187], None)
 # print(out)
 gc.collect()
@@ -153,10 +165,10 @@ torch.cuda.empty_cache()
 
 # input(0)
 
-print(f'\nLoading tokenizer {WORD_NAME}...')
+print(f"\nLoading tokenizer {WORD_NAME}...")
 tokenizer = TOKENIZER(WORD_NAME, UNKNOWN_CHAR=UNKNOWN_CHAR)
 if TOKEN_MODE == "pile":
-    assert tokenizer.tokenizer.decode([187]) == '\n'
+    assert tokenizer.tokenizer.decode([187]) == "\n"
 
 ########################################################################################################
 
@@ -176,6 +188,7 @@ print(
 time_slot = {}
 time_ref = time.time_ns()
 
+
 def record_time(name):
     if name not in time_slot:
         time_slot[name] = 1e20
@@ -183,13 +196,14 @@ def record_time(name):
     if tt < time_slot[name]:
         time_slot[name] = tt
 
+
 init_state = None
 init_out = None
 state = None
 out = None
 
 for TRIAL in range(1 if DEBUG_DEBUG else NUM_TRIALS):
-    print(("-" * 50) + '\n' + context, end="")
+    print(("-" * 50) + "\n" + context, end="")
 
     time_ref = time.time_ns()
     ctx = src_ctx.copy()
@@ -204,7 +218,7 @@ for TRIAL in range(1 if DEBUG_DEBUG else NUM_TRIALS):
         gc.collect()
         torch.cuda.empty_cache()
 
-    record_time('preprocess')
+    record_time("preprocess")
     out_last = src_len
     for i in range(src_len, src_len + (1 if DEBUG_DEBUG else LENGTH_PER_TRIAL)):
         x = ctx[: i + 1]
@@ -216,7 +230,14 @@ for TRIAL in range(1 if DEBUG_DEBUG else NUM_TRIALS):
         else:
             out, state = model.forward(x, state)
         if DEBUG_DEBUG:
-            print("model", np.array(x), "==>", np.array(out), np.max(out.cpu().numpy()), np.min(out.cpu().numpy()))
+            print(
+                "model",
+                np.array(x),
+                "==>",
+                np.array(out),
+                np.max(out.cpu().numpy()),
+                np.min(out.cpu().numpy()),
+            )
         if TOKEN_MODE == "pile":
             out[0] = -999999999  # disable <|endoftext|>
 
@@ -235,14 +256,15 @@ for TRIAL in range(1 if DEBUG_DEBUG else NUM_TRIALS):
             print(char, end="", flush=True)
         else:
             char = tokenizer.tokenizer.decode(ctx[out_last:])
-            if '\ufffd' not in char: # is valid utf8 string?
+            if "\ufffd" not in char:  # is valid utf8 string?
                 print(char, end="", flush=True)
-                out_last = i+1
+                out_last = i + 1
 
-    record_time('total')
+    record_time("total")
     # print(f'\n\n{time_slot}\n\n')
     print(
-        f"\n\n--- preprocess {round(time_slot['preprocess'], 2)}s, generation {round(time_slot['total']-time_slot['preprocess'], 2)}s ", end = ''
+        f"\n\n--- preprocess {round(time_slot['preprocess'], 2)}s, generation {round(time_slot['total']-time_slot['preprocess'], 2)}s ",
+        end="",
     )
 
-print(("-" * 50) + '\n')
+print(("-" * 50) + "\n")
