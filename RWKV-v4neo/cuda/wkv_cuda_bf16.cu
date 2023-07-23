@@ -39,6 +39,69 @@ __global__ void kernel_forward(const int B, const int T, const int C,
         bb = e1 * bb + e2;
         pp = p;
     }
+
+    /*
+    float aa = 0, bb = 0, pp = MIN_VALUE;
+
+    for文 1ループ目
+        const int ii = i * C
+        const float kk = float(k[ii]) = k[i * C]
+        const float vv = float(v[ii]) = v[i * C]
+
+        float ww = u + kk = u + k[i * C]
+        float p = max(pp, ww) = max(MIN_VALUE, u + k[i * C]) = u + k[i * C]
+        float e1 = exp(pp - p) = exp(MIN_VALUE - (u + k[i * C])) = 0
+        float e2 = exp(ww - p) = exp((u + k[i * C]) - (u + k[i * C])) = 1
+        y[ii] = bf16((e1 * aa + e2 * vv) / (e1 * bb + e2))
+              = bf16((0 * 0 + 1 * v[i * C]) / (0 * 0 + 1))
+              = bf16(v[i * C])
+      
+        ww = w + pp = w + MIN_VALUE
+        p = max(ww, kk) = max(w + MIN_VALUE, k[i * C]) = k[i * C]
+        e1 = exp(ww - p) = exp((w + MIN_VALUE) - k[i * C]) = 0
+        e2 = exp(kk - p) = exp(k[i * C] - k[i * C]) = 1
+        aa = e1 * aa + e2 * vv = 0 * 0 + 1 * v[i * C] = v[i * C]
+        bb = e1 * bb + e2 = 0 * 0 + 1 = 1
+        pp = p = k[i * C]
+    
+    for文 2ループ目
+        const int ii = (i+1) * C
+        const float kk = float(k[ii]) = k[(i+1) * C]
+        const float vv = float(v[ii]) = v[(i+1) * C]
+
+        float ww = u + kk = u + k[(i+1) * C]
+        float p = max(pp, ww) = max(k[i * C], u + k[(i+1) * C])
+        float e1 = exp(pp - p) = exp(k[i * C] - max(k[i * C], u + k[(i+1) * C]))
+        float e2 = exp(ww - p) = exp((u + k[(i+1) * C]) - max(k[i * C], u + k[(i+1) * C]))
+        y[ii] = bf16((e1 * aa + e2 * vv) / (e1 * bb + e2))
+              = bf16(
+                        (
+                            exp(k[i * C] - max(k[i * C], u + k[(i+1) * C])) * v[i * C] 
+                            + exp((u + k[(i+1) * C]) - max(k[i * C], u + k[(i+1) * C])) * v[(i+1) * C]
+                        )
+                        /
+                        (
+                            exp(k[i * C] - max(k[i * C], u + k[(i+1) * C])) * 1 
+                            + exp((u + k[(i+1) * C]) - max(k[i * C], u + k[(i+1) * C]))
+                        )
+                    )
+        ww = w + pp
+        p = max(ww, kk)
+        e1 = exp(ww - p)
+        e2 = exp(kk - p)
+        aa = e1 * aa + e2 * vv
+        bb = e1 * bb + e2
+        pp = p
+
+    */
+
+    /*
+    [メモ] 20230723_
+    この式は論文に書かれてる式とは違う。特にy[ii]=~~の式。
+    もしかすると、k[i * C]はすでに計算済みの値、つまりk[i * C] = -(i-1-j)w+k とかになってるのかもしれない
+    → なってなかった
+
+    */
 }
 
 __global__ void kernel_backward(const int B, const int T, const int C,
